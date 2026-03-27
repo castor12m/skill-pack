@@ -6,7 +6,7 @@
 
 ## 현재 상태
 
-**Phase 1b 진행 중** — 스킬 패키지화 완료, npm 배포 미착수
+**Phase 1 완료** — npm 배포 + 실 설치 테스트 통과
 
 ---
 
@@ -27,11 +27,23 @@
 
 ---
 
-## 다음 단계
+## 완료된 배포
 
-- [ ] npmjs.com `@skillpack` org 생성 + 배포
-- [ ] 실 registry에서 `skillpack install review` 테스트
+- [x] npmjs.com `@skillpack` org 생성 (owner: castor12m)
+- [x] 6개 패키지 배포 완료 (cli@0.1.0, 스킬 5개@1.0.0)
+- [x] 실 registry에서 `skillpack install review` 테스트 통과
+- [x] `npm access set status=public` 필요 (scoped 패키지 기본이 private이므로)
+
+---
+
+## 다음 단계 (Phase 2)
+
 - [ ] CONTRIBUTING.md 작성 (스킬 패키지 작성 가이드)
+- [ ] `npm install -g @skillpack/cli` 후 글로벌 CLI 테스트
+- [ ] GitHub repo public 전환
+- [ ] Private 스킬 GitHub Packages 배포
+- [ ] `skillpack init` — 새 스킬 스캐폴딩
+- [ ] `skillpack override` — 프로젝트 로컬 오버라이드
 
 ---
 
@@ -93,6 +105,12 @@ npm run publish
 #### PR 기여자 워크플로우
 - PR에 `npx changeset`으로 생성한 changeset 파일을 포함
 - maintainer가 머지 후 `npm run version` → `npm run publish`
+
+### 9. npm 배포 주의사항
+- `@skillpack` scoped 패키지는 기본이 private → 배포 후 반드시 `npm access set status=public` 실행
+- 또는 publish 시 `--access public` 플래그 사용
+- npm auth token: granular access token + bypass 2FA 필요
+- 배포 순서: `npm publish -w packages/skill-xxx --access public` → `npm access set status=public @skillpack/skill-xxx`
 
 ---
 
