@@ -6,7 +6,7 @@
 
 ## 현재 상태
 
-**Phase 1 완료** — npm 배포 + 실 설치 테스트 통과
+**Phase 2 완료** — init, override 명령어 추가 + private 스킬 가이드 저장소 구성
 
 ---
 
@@ -36,14 +36,24 @@
 
 ---
 
-## 다음 단계 (Phase 2)
+## Phase 2 완료 (2026-03-28)
 
-- [ ] CONTRIBUTING.md 작성 (스킬 패키지 작성 가이드)
-- [ ] `npm install -g @skillpack/cli` 후 글로벌 CLI 테스트
-- [ ] GitHub repo public 전환
-- [ ] Private 스킬 GitHub Packages 배포
-- [ ] `skillpack init` — 새 스킬 스캐폴딩
-- [ ] `skillpack override` — 프로젝트 로컬 오버라이드
+- [x] CONTRIBUTING.md 작성 (스킬 패키지 작성 가이드)
+- [x] `npm install -g @skillpack/cli` 후 글로벌 CLI 테스트 — `@skillpack/cli@0.1.2` 배포 완료
+- [x] GitHub repo public 전환
+- [x] Private 스킬 GitHub Packages 가이드 — `skill-pack-private` 예시 저장소 구성
+- [x] `skillpack init` — 새 스킬 스캐폴딩 (`--scope` 옵션 지원)
+- [x] `skillpack override` — `.claude/commands/`에 프로젝트 로컬 오버라이드 (`--list`, `--reset` 지원)
+- [x] SEO 키워드 보강 (README + 모든 package.json)
+- [x] `naraspace` 참조 → `castor12m` 수정
+
+## 다음 단계 (Phase 3)
+
+- [ ] `skillpack search` — 레지스트리 검색
+- [ ] Cursor `.cursorrules` 타겟 지원
+- [ ] 멀티 AI 도구 설치 경로 설정
+- [ ] npm 배포: init/override 포함 CLI 0.2.0
+- [ ] `skill-pack-private`에 GitHub Actions workflow 추가 (workflow 스코프 토큰 필요)
 
 ---
 
@@ -106,7 +116,26 @@ npm run publish
 - PR에 `npx changeset`으로 생성한 changeset 파일을 포함
 - maintainer가 머지 후 `npm run version` → `npm run publish`
 
-### 9. npm 배포 주의사항
+### 9. skillpack init
+- `skillpack init <name> [--scope <scope>]` — 새 스킬 패키지 스캐폴딩
+- 기본 scope: `@skillpack`, `--scope @mycompany`로 변경 가능
+- `process.cwd()/packages/skill-<name>/` 에 4개 파일 생성 (package.json, skill.json, SKILL.md, README.md)
+- 이미 존재하면 거부 (비파괴적)
+
+### 10. skillpack override
+- `skillpack override <name>` — 관리 스킬을 `.claude/commands/<name>/`에 복사
+- Claude Code의 프로젝트 레벨 commands 지원을 활용
+- `--list` — 현재 프로젝트의 오버라이드 목록
+- `--reset <name>` — 오버라이드 제거
+- `--force` — 기존 오버라이드 덮어쓰기
+
+### 11. Private 스킬 예시 저장소
+- `skill-pack-private` (https://github.com/castor12m/skill-pack-private)
+- `@anthropic-skills` 스코프를 예시로 사용 (사용자가 자기 org으로 교체)
+- omo, lol, ulw 3개 오케스트레이터 스킬 포함
+- GitHub Actions workflow는 토큰 스코프 문제로 별도 추가 필요
+
+### 12. npm 배포 주의사항
 - `@skillpack` scoped 패키지는 기본이 private → 배포 후 반드시 `npm access set status=public` 실행
 - 또는 publish 시 `--access public` 플래그 사용
 - npm auth token: granular access token + bypass 2FA 필요
