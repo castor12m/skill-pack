@@ -1,8 +1,9 @@
 const manifest = require('../manifest');
 const { resolvePackageName, viewPackage, downloadAndExtract, cleanup } = require('../registry');
-const { readSkillJson, installFiles } = require('../installer');
+const { readSkillJson, installFiles, computeChecksums, getModifiedFiles } = require('../installer');
 
 module.exports = function update(args) {
+  const force = args.includes('--force');
   const names = args.filter(a => !a.startsWith('--'));
   const data = manifest.read();
 
@@ -37,12 +38,27 @@ module.exports = function update(args) {
         continue;
       }
 
+      // Check for local modifications
+      if (!force) {
+        const modified = getModifiedFiles(skillName, existing.checksums);
+        if (modified.length > 0) {
+          console.error(`\u26a0\ufe0f  ${skillName} has local modifications:`);
+          for (const file of modified) {
+            console.error(`  - ${file}`);
+          }
+          console.error(`Use --force to overwrite, or back up your changes first.`);
+          process.exitCode = 1;
+          continue;
+        }
+      }
+
       const packageDir = downloadAndExtract(packageName);
 
       try {
         const skillJson = readSkillJson(packageDir);
         installFiles(packageDir, skillJson, { force: true });
-        manifest.set(skillJson.name, info.version);
+        const checksums = computeChecksums(skillJson);
+        manifest.set(skillJson.name, info.version, checksums);
         console.log(`\u2705 ${skillName} ${existing.version} \u2192 ${info.version}`);
       } finally {
         cleanup(packageDir);

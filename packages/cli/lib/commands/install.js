@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const manifest = require('../manifest');
 const { resolvePackageName, viewPackage, downloadAndExtract, cleanup } = require('../registry');
-const { readSkillJson, installFiles, ConflictError } = require('../installer');
+const { readSkillJson, installFiles, computeChecksums, ConflictError } = require('../installer');
 
 /**
  * Check if an argument looks like a local path.
@@ -51,7 +51,8 @@ module.exports = function install(args) {
         }
 
         const targetDir = installFiles(packageDir, skillJson, { force });
-        manifest.set(skillJson.name, version);
+        const checksums = computeChecksums(skillJson);
+        manifest.set(skillJson.name, version, checksums);
         console.log(`\u2705 ${skillJson.name}@${version} \u2192 ${targetDir}`);
       } else {
         // --- Registry install ---
@@ -75,7 +76,8 @@ module.exports = function install(args) {
         try {
           const skillJson = readSkillJson(packageDir);
           const targetDir = installFiles(packageDir, skillJson, { force });
-          manifest.set(skillJson.name, info.version);
+          const checksums = computeChecksums(skillJson);
+          manifest.set(skillJson.name, info.version, checksums);
           console.log(`\u2705 ${skillJson.name}@${info.version} \u2192 ${targetDir}`);
         } finally {
           cleanup(packageDir);

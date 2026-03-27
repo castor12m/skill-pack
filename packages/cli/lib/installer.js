@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { skillsDir } = require('./paths');
@@ -85,4 +86,68 @@ class ConflictError extends Error {
   }
 }
 
-module.exports = { readSkillJson, installFiles, uninstallFiles, ConflictError };
+/**
+ * Compute SHA-256 hash of a file.
+ */
+function hashFile(filePath) {
+  const content = fs.readFileSync(filePath);
+  return crypto.createHash('sha256').update(content).digest('hex');
+}
+
+/**
+ * Compute checksums for all installed skill files.
+ * Returns { "SKILL.md": "abc123...", "help.md": "def456..." }
+ */
+function computeChecksums(skillJson) {
+  const targetDir = path.join(skillsDir, skillJson.name);
+  const checksums = {};
+
+  for (const file of skillJson.files) {
+    const filePath = path.join(targetDir, file);
+    if (!fs.existsSync(filePath)) continue;
+
+    if (fs.statSync(filePath).isDirectory()) {
+      const entries = fs.readdirSync(filePath, { recursive: true });
+      for (const entry of entries) {
+        const fullPath = path.join(filePath, entry);
+        if (fs.statSync(fullPath).isFile()) {
+          const relPath = path.join(file, entry);
+          checksums[relPath] = hashFile(fullPath);
+        }
+      }
+    } else {
+      checksums[file] = hashFile(filePath);
+    }
+  }
+
+  return checksums;
+}
+
+/**
+ * Check which files have been locally modified since installation.
+ * Returns array of modified file names, empty if no modifications.
+ */
+function getModifiedFiles(skillName, savedChecksums) {
+  if (!savedChecksums || Object.keys(savedChecksums).length === 0) return [];
+
+  const targetDir = path.join(skillsDir, skillName);
+  if (!fs.existsSync(targetDir)) return [];
+
+  const modified = [];
+  for (const [file, savedHash] of Object.entries(savedChecksums)) {
+    const filePath = path.join(targetDir, file);
+    if (!fs.existsSync(filePath)) {
+      modified.push(file + ' (deleted)');
+    } else {
+      const currentHash = hashFile(filePath);
+      if (currentHash !== savedHash) {
+        modified.push(file);
+      }
+    }
+  }
+  return modified;
+}
+
+module.exports = {
+  readSkillJson, installFiles, uninstallFiles, computeChecksums, getModifiedFiles, ConflictError,
+};
