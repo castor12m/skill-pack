@@ -4,9 +4,14 @@
   "description": "Specification-Driven Development skill for Claude Code",
   "keywords": [
     "claude-code",
+    "claude-code-skills",
     "skill",
     "skillpack",
-    "sdd"
+    "sdd",
+    "specification-driven-development",
+    "ai-coding-assistant",
+    "ai-developer-tools",
+    "slash-commands"
   ],
   "license": "MIT",
   "engines": {

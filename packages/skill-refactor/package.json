@@ -4,9 +4,15 @@
   "description": "Code refactoring skill for Claude Code",
   "keywords": [
     "claude-code",
+    "claude-code-skills",
     "skill",
     "skillpack",
-    "refactor"
+    "refactor",
+    "refactoring",
+    "code-refactoring",
+    "ai-coding-assistant",
+    "ai-developer-tools",
+    "slash-commands"
   ],
   "license": "MIT",
   "engines": {

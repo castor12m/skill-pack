@@ -4,9 +4,14 @@
   "description": "Session handoff skill for Claude Code",
   "keywords": [
     "claude-code",
+    "claude-code-skills",
     "skill",
     "skillpack",
-    "handoff"
+    "handoff",
+    "session-handoff",
+    "ai-coding-assistant",
+    "ai-developer-tools",
+    "slash-commands"
   ],
   "license": "MIT",
   "engines": {

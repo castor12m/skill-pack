@@ -4,9 +4,15 @@
   "description": "Systematic debugging skill for Claude Code",
   "keywords": [
     "claude-code",
+    "claude-code-skills",
     "skill",
     "skillpack",
-    "debug"
+    "debug",
+    "debugging",
+    "root-cause-analysis",
+    "ai-coding-assistant",
+    "ai-developer-tools",
+    "slash-commands"
   ],
   "license": "MIT",
   "engines": {

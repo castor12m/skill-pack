@@ -7,10 +7,16 @@
   },
   "keywords": [
     "claude-code",
+    "claude-code-skills",
     "skill",
     "skillpack",
     "cli",
-    "package-manager"
+    "package-manager",
+    "ai-coding-assistant",
+    "ai-developer-tools",
+    "prompt-management",
+    "slash-commands",
+    "claude-code-extensions"
   ],
   "repository": {
     "type": "git",

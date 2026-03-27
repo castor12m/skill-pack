@@ -2,11 +2,15 @@
 
 > A package manager for AI coding assistant skills — install, manage, and publish like npm
 
+**SkillPack** is a CLI tool that brings npm-style package management to [Claude Code](https://docs.anthropic.com/en/docs/claude-code) custom skills. Install community-built skills, share your own, and keep everything versioned and in sync across machines and teams.
+
+Keywords: Claude Code skills, AI coding assistant, prompt management, slash commands, AI developer tools, Claude Code extensions, AI workflow automation
+
 ---
 
 ## Why SkillPack?
 
-Claude Code lets you define custom skills in `~/.claude/skills/`. But:
+[Claude Code](https://docs.anthropic.com/en/docs/claude-code) lets you define custom skills (slash commands) in `~/.claude/skills/`. But:
 
 - There's no official way to keep skills in sync across multiple machines
 - No version tracking — you can't tell which version of a skill you're running

@@ -4,9 +4,13 @@
   "description": "Pre-landing PR review skill for Claude Code",
   "keywords": [
     "claude-code",
+    "claude-code-skills",
     "skill",
     "skillpack",
-    "code-review"
+    "code-review",
+    "ai-coding-assistant",
+    "ai-developer-tools",
+    "slash-commands"
   ],
   "license": "MIT",
   "engines": {
