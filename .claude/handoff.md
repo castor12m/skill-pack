@@ -20,6 +20,9 @@
 - [x] `list --all` — 전체 스킬 표시 ([managed]/[local] 구분)
 - [x] README.md를 CLI 직접 복사 방식으로 전면 업데이트
 - [x] 로컬 E2E 테스트 통과 (install → list → 충돌 감지 → uninstall)
+- [x] 체크섬 기반 로컬 수정 감지 (SHA-256, manifest에 저장)
+- [x] list 색상 출력 ([local] 흰색, [managed] 초록색, [modified] 노란색)
+- [x] Changesets 설정 (버전 관리 + CHANGELOG 자동화)
 - [x] ULW 멀티 모델 교차검증 완료 (Claude sonnet + Gemini 2.5-flash)
 
 ---
@@ -60,6 +63,36 @@
 - **수동 배포만** — PR 머지 후 maintainer가 직접 `npm publish`
 - 스킬은 AI 행동을 직접 제어하므로 자동 배포는 프롬프트 인젝션 위험
 - 자동 배포는 신뢰 기여자 풀이 형성된 후 검토
+
+### 7. 체크섬 기반 로컬 수정 감지
+- 설치 시 각 파일의 SHA-256 해시를 `~/.skillpack/manifest.json`에 저장
+- `update` 시 현재 파일 해시와 비교 → 다르면 거부 + 수정 파일 목록 표시
+- `--force`로 무시하고 강제 업데이트 가능
+- `list`, `list --all`에서도 `[modified]` 태그로 표시
+
+### 8. 버전 관리 (Changesets)
+- `@changesets/cli` 사용 — monorepo 표준 버전 관리 도구
+- 각 패키지 독립 버전 (linked/fixed 없음)
+- access: public
+
+#### 버전 워크플로우
+```bash
+# 1. 스킬 수정 후 changeset 작성
+npx changeset
+# → 변경된 패키지 선택 → patch/minor/major → 설명 작성
+# → .changeset/ 아래에 changeset 파일 생성됨
+
+# 2. 배포 전 버전 bump (maintainer)
+npm run version
+# → package.json 버전 자동 업데이트 + CHANGELOG.md 생성
+
+# 3. npm 배포 (maintainer)
+npm run publish
+```
+
+#### PR 기여자 워크플로우
+- PR에 `npx changeset`으로 생성한 changeset 파일을 포함
+- maintainer가 머지 후 `npm run version` → `npm run publish`
 
 ---
 
@@ -150,6 +183,7 @@ skill-pack/
 ├── CONTEXT.md                            ← 설계 배경
 ├── HANDOFF.md                            ← 상세 핸드오프 원본
 ├── .claude/handoff.md                    ← 세션 재개용 (이 파일)
+├── .changeset/                           ← Changesets 설정 + changeset 파일
 ├── packages/
 │   ├── cli/                              ← @skillpack/cli
 │   │   ├── bin/skillpack.js
