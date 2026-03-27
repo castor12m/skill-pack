@@ -10,11 +10,12 @@ Usage:
   skillpack <command> [options]
 
 Commands:
-  install <name[@version]> [...]   Install skills from the registry
-  list [--all]                     List installed skills (--all: include local)
-  update [name]                    Update all or a specific skill
-  uninstall <name>                 Remove an installed skill
-  help                             Show this help message
+  install <name[@version]> [...]        Install skills from the registry
+  list [--all]                          List installed skills (--all: include local)
+  update [name]                         Update all or a specific skill
+  uninstall <name>                      Remove an installed skill
+  init <name> [--scope <scope>]         Scaffold a new skill package
+  help                                  Show this help message
 
 Options:
   --force    Overwrite existing skill files on install/update
@@ -28,6 +29,8 @@ Examples:
   skillpack update                        Update all skills
   skillpack update review                 Update a specific skill
   skillpack uninstall review              Remove a skill
+  skillpack init myskill                  Create new skill package
+  skillpack init myskill --scope @myco    Create with custom scope
 
 Private skills (org-scoped):
   skillpack install @mycompany/skill-xxx  Install from GitHub Packages
@@ -50,6 +53,8 @@ function run() {
     case 'rm':
     case 'remove':
       return require('../lib/commands/uninstall')(args.slice(1));
+    case 'init':
+      return require('../lib/commands/init')(args.slice(1));
     case 'help':
     case '--help':
     case '-h':
