@@ -61,6 +61,11 @@ function run() {
       return require('../lib/commands/init')(args.slice(1));
     case 'override':
       return require('../lib/commands/override')(args.slice(1));
+    case 'version':
+    case '--version':
+    case '-v':
+      console.log(require('../package.json').version);
+      return;
     case 'help':
     case '--help':
     case '-h':
