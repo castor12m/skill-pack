@@ -31,9 +31,14 @@ function listManaged() {
     return;
   }
 
+  const maxName = Math.max(...entries.map(([n, i]) => `${n}@${i.version}`.length));
+
   for (const [name, info] of entries) {
+    const label = `${name}@${info.version}`;
+    const modified = getModifiedFiles(name, info.checksums);
+    const status = modified.length > 0 ? color.yellow(' [modified]') : '';
     const dir = path.join(skillsDir, name);
-    console.log(`${name}@${info.version}\t${dir}`);
+    console.log(`${label.padEnd(maxName + 2)} ${color.green('[managed]')}${status}  ${color.dim(dir)}`);
   }
 }
 
