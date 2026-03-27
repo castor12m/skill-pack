@@ -1,0 +1,13 @@
+{
+  "project": "",
+  "currentPhase": "init",
+  "documents": {
+    "spec": { "status": "none", "version": 0, "path": "docs/sdd/spec.md" },
+    "plan": { "status": "none", "version": 0, "path": "docs/sdd/plan.md" },
+    "tasks": { "status": "none", "version": 0, "path": "docs/sdd/tasks.md" }
+  },
+  "scale": "unknown",
+  "feedbackLog": [],
+  "createdAt": "",
+  "updatedAt": ""
+}

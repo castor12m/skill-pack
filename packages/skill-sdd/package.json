@@ -1,0 +1,16 @@
+{
+  "name": "@skillpack/skill-sdd",
+  "version": "1.0.0",
+  "description": "Specification-Driven Development skill for Claude Code",
+  "keywords": ["claude-code", "skill", "skillpack", "sdd"],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "skill.json",
+    "SKILL.md",
+    "help.md",
+    "templates"
+  ]
+}

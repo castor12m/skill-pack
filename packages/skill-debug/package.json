@@ -1,0 +1,14 @@
+{
+  "name": "@skillpack/skill-debug",
+  "version": "1.0.0",
+  "description": "Systematic debugging skill for Claude Code",
+  "keywords": ["claude-code", "skill", "skillpack", "debug"],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "skill.json",
+    "SKILL.md"
+  ]
+}

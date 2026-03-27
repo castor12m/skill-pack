@@ -1,0 +1,14 @@
+{
+  "name": "@skillpack/skill-handoff",
+  "version": "1.0.0",
+  "description": "Session handoff skill for Claude Code",
+  "keywords": ["claude-code", "skill", "skillpack", "handoff"],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "skill.json",
+    "SKILL.md"
+  ]
+}

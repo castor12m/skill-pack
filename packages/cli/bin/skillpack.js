@@ -11,7 +11,7 @@ Usage:
 
 Commands:
   install <name[@version]> [...]   Install skills from the registry
-  list                             List installed skills
+  list [--all]                     List installed skills (--all: include local)
   update [name]                    Update all or a specific skill
   uninstall <name>                 Remove an installed skill
   help                             Show this help message
@@ -42,7 +42,7 @@ function run() {
       return require('../lib/commands/install')(args.slice(1));
     case 'list':
     case 'ls':
-      return require('../lib/commands/list')();
+      return require('../lib/commands/list')(args.slice(1));
     case 'update':
     case 'up':
       return require('../lib/commands/update')(args.slice(1));

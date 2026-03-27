@@ -1,6 +1,30 @@
+const fs = require('fs');
+const path = require('path');
 const manifest = require('../manifest');
 const { resolvePackageName, viewPackage, downloadAndExtract, cleanup } = require('../registry');
 const { readSkillJson, installFiles, ConflictError } = require('../installer');
+
+/**
+ * Check if an argument looks like a local path.
+ */
+function isLocalPath(arg) {
+  return arg.startsWith('.') || arg.startsWith('/') || arg.startsWith('~');
+}
+
+/**
+ * Resolve a local path to absolute and read version from its package.json.
+ */
+function resolveLocal(raw) {
+  const resolved = path.resolve(raw.replace(/^~/, require('os').homedir()));
+  if (!fs.existsSync(resolved)) {
+    throw new Error(`Local path not found: ${resolved}`);
+  }
+  const pkgJsonPath = path.join(resolved, 'package.json');
+  const version = fs.existsSync(pkgJsonPath)
+    ? JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8')).version || '0.0.0'
+    : '0.0.0';
+  return { packageDir: resolved, version };
+}
 
 module.exports = function install(args) {
   const force = args.includes('--force');
@@ -8,50 +32,60 @@ module.exports = function install(args) {
 
   if (names.length === 0) {
     console.error('Usage: skillpack install <name[@version]> [...]');
+    console.error('       skillpack install ./path/to/skill-package');
     process.exitCode = 1;
     return;
   }
 
   for (const raw of names) {
-    const { name, version } = parseName(raw);
-    const packageName = resolvePackageName(name);
-
     try {
-      // Check if already installed (same version)
-      const existing = manifest.get(extractSkillName(name));
-      if (existing && !force && !version) {
-        console.log(`${extractSkillName(name)}@${existing.version} is already installed. Use --force to reinstall.`);
-        continue;
-      }
-
-      // Fetch package info
-      const info = viewPackage(packageName, version);
-      if (!info) {
-        console.error(`Package not found: ${packageName}${version ? '@' + version : ''}`);
-        process.exitCode = 1;
-        continue;
-      }
-
-      // Download and extract
-      const packageDir = downloadAndExtract(packageName, version);
-
-      try {
-        // Read skill.json and install files
+      if (isLocalPath(raw)) {
+        // --- Local path install ---
+        const { packageDir, version } = resolveLocal(raw);
         const skillJson = readSkillJson(packageDir);
+
+        const existing = manifest.get(skillJson.name);
+        if (existing && !force) {
+          console.log(`${skillJson.name}@${existing.version} is already installed. Use --force to reinstall.`);
+          continue;
+        }
+
         const targetDir = installFiles(packageDir, skillJson, { force });
+        manifest.set(skillJson.name, version);
+        console.log(`\u2705 ${skillJson.name}@${version} \u2192 ${targetDir}`);
+      } else {
+        // --- Registry install ---
+        const { name, version } = parseName(raw);
+        const packageName = resolvePackageName(name);
 
-        // Update manifest
-        manifest.set(skillJson.name, info.version);
+        const existing = manifest.get(extractSkillName(name));
+        if (existing && !force && !version) {
+          console.log(`${extractSkillName(name)}@${existing.version} is already installed. Use --force to reinstall.`);
+          continue;
+        }
 
-        console.log(`\u2705 ${skillJson.name}@${info.version} \u2192 ${targetDir}`);
-      } finally {
-        cleanup(packageDir);
+        const info = viewPackage(packageName, version);
+        if (!info) {
+          console.error(`Package not found: ${packageName}${version ? '@' + version : ''}`);
+          process.exitCode = 1;
+          continue;
+        }
+
+        const packageDir = downloadAndExtract(packageName, version);
+        try {
+          const skillJson = readSkillJson(packageDir);
+          const targetDir = installFiles(packageDir, skillJson, { force });
+          manifest.set(skillJson.name, info.version);
+          console.log(`\u2705 ${skillJson.name}@${info.version} \u2192 ${targetDir}`);
+        } finally {
+          cleanup(packageDir);
+        }
       }
     } catch (err) {
       if (err instanceof ConflictError) {
         console.error(`\u26a0\ufe0f  ${err.message}`);
       } else {
-        console.error(`Failed to install ${name}: ${err.message}`);
+        console.error(`Failed to install ${raw}: ${err.message}`);
       }
       process.exitCode = 1;
     }

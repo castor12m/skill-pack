@@ -1,0 +1,14 @@
+{
+  "name": "@skillpack/skill-refactor",
+  "version": "1.0.0",
+  "description": "Code refactoring skill for Claude Code",
+  "keywords": ["claude-code", "skill", "skillpack", "refactor"],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "skill.json",
+    "SKILL.md"
+  ]
+}

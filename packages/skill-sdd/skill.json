@@ -1,0 +1,10 @@
+{
+  "name": "sdd",
+  "command": "/sdd",
+  "entry": "SKILL.md",
+  "files": [
+    "SKILL.md",
+    "help.md",
+    "templates"
+  ]
+}

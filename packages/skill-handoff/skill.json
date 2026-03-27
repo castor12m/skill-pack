@@ -1,0 +1,8 @@
+{
+  "name": "handoff",
+  "command": "/handoff",
+  "entry": "SKILL.md",
+  "files": [
+    "SKILL.md"
+  ]
+}

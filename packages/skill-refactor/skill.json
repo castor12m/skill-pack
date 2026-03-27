@@ -1,0 +1,8 @@
+{
+  "name": "refactor",
+  "command": "/refactor",
+  "entry": "SKILL.md",
+  "files": [
+    "SKILL.md"
+  ]
+}
