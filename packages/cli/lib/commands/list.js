@@ -2,6 +2,14 @@ const fs = require('fs');
 const path = require('path');
 const manifest = require('../manifest');
 const { skillsDir } = require('../paths');
+const { getModifiedFiles } = require('../installer');
+
+const color = {
+  green: (s) => `\x1b[32m${s}\x1b[0m`,
+  white: (s) => `\x1b[37m${s}\x1b[0m`,
+  yellow: (s) => `\x1b[33m${s}\x1b[0m`,
+  dim: (s) => `\x1b[2m${s}\x1b[0m`,
+};
 
 module.exports = function list(args) {
   const showAll = args.includes('--all');
@@ -54,8 +62,19 @@ function listAll() {
   for (const name of dirs) {
     const info = managed[name];
     const label = info ? `${name}@${info.version}` : name;
-    const tag = info ? '[managed]' : '[local]';
-    console.log(`${label.padEnd(maxName + 2)} ${tag.padEnd(10)} ${path.join(skillsDir, name)}`);
+
+    let tag, status = '';
+    if (info) {
+      tag = color.green('[managed]');
+      const modified = getModifiedFiles(name, info.checksums);
+      if (modified.length > 0) {
+        status = color.yellow(' [modified]');
+      }
+    } else {
+      tag = color.white('[local]');
+    }
+
+    console.log(`${label.padEnd(maxName + 2)} ${tag}${status.padEnd(0)}  ${color.dim(path.join(skillsDir, name))}`);
   }
 
   const managedCount = dirs.filter(n => managed[n]).length;
