@@ -1,0 +1,12 @@
+{
+  "name": "review",
+  "command": "/review",
+  "entry": "SKILL.md",
+  "files": [
+    "SKILL.md",
+    "checklist.md",
+    "design-checklist.md",
+    "TODOS-format.md",
+    "greptile-triage.md"
+  ]
+}

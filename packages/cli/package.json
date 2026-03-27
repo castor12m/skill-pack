@@ -1,0 +1,17 @@
+{
+  "name": "@skillpack/cli",
+  "version": "0.1.0",
+  "description": "SkillPack CLI — AI coding tool skill package manager",
+  "bin": {
+    "skillpack": "./bin/skillpack.js"
+  },
+  "keywords": ["claude-code", "skill", "skillpack", "cli", "package-manager"],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "bin/",
+    "lib/"
+  ]
+}
