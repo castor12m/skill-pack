@@ -1,8 +1,13 @@
 {
   "name": "@skillpack/skill-review",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Pre-landing PR review skill for Claude Code",
-  "keywords": ["claude-code", "skill", "skillpack", "code-review"],
+  "keywords": [
+    "claude-code",
+    "skill",
+    "skillpack",
+    "code-review"
+  ],
   "license": "MIT",
   "engines": {
     "node": ">=18"
@@ -14,5 +19,10 @@
     "design-checklist.md",
     "TODOS-format.md",
     "greptile-triage.md"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/castor12m/skill-pack.git",
+    "directory": "packages/skill-review"
+  }
 }

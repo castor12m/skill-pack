@@ -1,8 +1,13 @@
 {
   "name": "@skillpack/skill-sdd",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Specification-Driven Development skill for Claude Code",
-  "keywords": ["claude-code", "skill", "skillpack", "sdd"],
+  "keywords": [
+    "claude-code",
+    "skill",
+    "skillpack",
+    "sdd"
+  ],
   "license": "MIT",
   "engines": {
     "node": ">=18"
@@ -12,5 +17,10 @@
     "SKILL.md",
     "help.md",
     "templates"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/castor12m/skill-pack.git",
+    "directory": "packages/skill-sdd"
+  }
 }

@@ -1,11 +1,22 @@
 {
   "name": "@skillpack/cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "SkillPack CLI — AI coding tool skill package manager",
   "bin": {
-    "skillpack": "./bin/skillpack.js"
+    "skillpack": "bin/skillpack.js"
   },
-  "keywords": ["claude-code", "skill", "skillpack", "cli", "package-manager"],
+  "keywords": [
+    "claude-code",
+    "skill",
+    "skillpack",
+    "cli",
+    "package-manager"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/castor12m/skill-pack.git",
+    "directory": "packages/cli"
+  },
   "license": "MIT",
   "engines": {
     "node": ">=18"

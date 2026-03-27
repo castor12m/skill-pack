@@ -1,8 +1,13 @@
 {
   "name": "@skillpack/skill-refactor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Code refactoring skill for Claude Code",
-  "keywords": ["claude-code", "skill", "skillpack", "refactor"],
+  "keywords": [
+    "claude-code",
+    "skill",
+    "skillpack",
+    "refactor"
+  ],
   "license": "MIT",
   "engines": {
     "node": ">=18"
@@ -10,5 +15,10 @@
   "files": [
     "skill.json",
     "SKILL.md"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/castor12m/skill-pack.git",
+    "directory": "packages/skill-refactor"
+  }
 }
