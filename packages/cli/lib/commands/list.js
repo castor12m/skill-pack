@@ -46,13 +46,16 @@ function listAll() {
     return;
   }
 
+  const maxName = Math.max(...dirs.map(n => {
+    const info = managed[n];
+    return info ? `${n}@${info.version}`.length : n.length;
+  }));
+
   for (const name of dirs) {
     const info = managed[name];
-    if (info) {
-      console.log(`${name}@${info.version}\t[managed]\t${path.join(skillsDir, name)}`);
-    } else {
-      console.log(`${name}\t\t[local]\t\t${path.join(skillsDir, name)}`);
-    }
+    const label = info ? `${name}@${info.version}` : name;
+    const tag = info ? '[managed]' : '[local]';
+    console.log(`${label.padEnd(maxName + 2)} ${tag.padEnd(10)} ${path.join(skillsDir, name)}`);
   }
 
   const managedCount = dirs.filter(n => managed[n]).length;
