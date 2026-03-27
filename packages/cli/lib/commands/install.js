@@ -20,10 +20,14 @@ function resolveLocal(raw) {
     throw new Error(`Local path not found: ${resolved}`);
   }
   const pkgJsonPath = path.join(resolved, 'package.json');
-  const version = fs.existsSync(pkgJsonPath)
-    ? JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8')).version || '0.0.0'
-    : '0.0.0';
-  return { packageDir: resolved, version };
+  let version = '0.0.0';
+  let source = null;
+  if (fs.existsSync(pkgJsonPath)) {
+    const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
+    version = pkg.version || '0.0.0';
+    source = pkg.name || null;
+  }
+  return { packageDir: resolved, version, source };
 }
 
 module.exports = function install(args) {
@@ -41,7 +45,7 @@ module.exports = function install(args) {
     try {
       if (isLocalPath(raw)) {
         // --- Local path install ---
-        const { packageDir, version } = resolveLocal(raw);
+        const { packageDir, version, source } = resolveLocal(raw);
         const skillJson = readSkillJson(packageDir);
 
         const existing = manifest.get(skillJson.name);
@@ -52,7 +56,7 @@ module.exports = function install(args) {
 
         const targetDir = installFiles(packageDir, skillJson, { force });
         const checksums = computeChecksums(skillJson);
-        manifest.set(skillJson.name, version, checksums);
+        manifest.set(skillJson.name, version, checksums, source);
         console.log(`\u2705 ${skillJson.name}@${version} \u2192 ${targetDir}`);
       } else {
         // --- Registry install ---
@@ -77,7 +81,7 @@ module.exports = function install(args) {
           const skillJson = readSkillJson(packageDir);
           const targetDir = installFiles(packageDir, skillJson, { force });
           const checksums = computeChecksums(skillJson);
-          manifest.set(skillJson.name, info.version, checksums);
+          manifest.set(skillJson.name, info.version, checksums, packageName);
           console.log(`\u2705 ${skillJson.name}@${info.version} \u2192 ${targetDir}`);
         } finally {
           cleanup(packageDir);

@@ -16,13 +16,14 @@ function get(skillName) {
   return m[skillName] || null;
 }
 
-function set(skillName, version, checksums) {
+function set(skillName, version, checksums, source) {
   const m = read();
   m[skillName] = {
     version,
     installedAt: new Date().toISOString(),
     checksums: checksums || {},
   };
+  if (source) m[skillName].source = source;
   write(m);
 }
 
