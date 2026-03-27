@@ -4,7 +4,15 @@
   "workspaces": [
     "packages/*"
   ],
+  "scripts": {
+    "changeset": "changeset",
+    "version": "changeset version",
+    "publish": "changeset publish"
+  },
   "engines": {
     "node": ">=18"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.30.0"
   }
 }
