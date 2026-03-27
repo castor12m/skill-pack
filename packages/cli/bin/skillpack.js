@@ -15,6 +15,7 @@ Commands:
   update [name]                         Update all or a specific skill
   uninstall <name>                      Remove an installed skill
   init <name> [--scope <scope>]         Scaffold a new skill package
+  override <name>                       Copy skill to project for local editing
   help                                  Show this help message
 
 Options:
@@ -31,6 +32,9 @@ Examples:
   skillpack uninstall review              Remove a skill
   skillpack init myskill                  Create new skill package
   skillpack init myskill --scope @myco    Create with custom scope
+  skillpack override review               Override review skill locally
+  skillpack override --list               List project overrides
+  skillpack override --reset review       Remove local override
 
 Private skills (org-scoped):
   skillpack install @mycompany/skill-xxx  Install from GitHub Packages
@@ -55,6 +59,8 @@ function run() {
       return require('../lib/commands/uninstall')(args.slice(1));
     case 'init':
       return require('../lib/commands/init')(args.slice(1));
+    case 'override':
+      return require('../lib/commands/override')(args.slice(1));
     case 'help':
     case '--help':
     case '-h':
