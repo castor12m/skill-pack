@@ -30,9 +30,9 @@ Examples:
   skillpack uninstall review              Remove a skill
 
 Private skills (org-scoped):
-  skillpack install @naraspace/skill-xxx  Install from GitHub Packages
+  skillpack install @mycompany/skill-xxx  Install from GitHub Packages
 
-Learn more: https://github.com/naraspace/skill-pack
+Learn more: https://github.com/castor12m/skill-pack
 `.trim();
 
 function run() {

@@ -25,4 +25,4 @@ In Claude Code:
 - Conditional side effects
 - Structural issues in the diff
 
-## Part of [SkillPack](https://github.com/naraspace/skill-pack)
+## Part of [SkillPack](https://github.com/castor12m/skill-pack)

@@ -89,7 +89,7 @@ packages/skill-review/
 - 배포는 여전히 `npm publish`로 npmjs.com에
 
 ### 4. Private 스킬 패키지명 규칙
-- `@`로 시작 → full package name 그대로 사용 (`@naraspace/skill-xxx`)
+- `@`로 시작 → full package name 그대로 사용 (`@mycompany/skill-xxx`)
 - `@` 없음 → `@skillpack/skill-{name}`으로 변환 (`review` → `@skillpack/skill-review`)
 
 ### 5. @skillpack org

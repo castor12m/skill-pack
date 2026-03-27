@@ -5,7 +5,7 @@ const os = require('os');
 
 /**
  * Resolve a skill name to a full npm package name.
- * - Starts with @ → use as-is (e.g. @naraspace/skill-xxx)
+ * - Starts with @ → use as-is (e.g. @mycompany/skill-xxx)
  * - Otherwise → @skillpack/skill-{name}
  */
 function resolvePackageName(name) {
