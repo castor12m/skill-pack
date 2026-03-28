@@ -32,11 +32,18 @@ function resolveLocal(raw) {
 
 module.exports = function install(args) {
   const force = args.includes('--force');
+  const target = extractOption(args, '--target') || 'claude';
   const names = args.filter(a => !a.startsWith('--'));
 
   if (names.length === 0) {
     console.error('Usage: skillpack install <name[@version]> [...]');
     console.error('       skillpack install ./path/to/skill-package');
+    process.exitCode = 1;
+    return;
+  }
+
+  if (!['claude', 'cursor'].includes(target)) {
+    console.error(`Unknown target: ${target}. Supported: claude, cursor`);
     process.exitCode = 1;
     return;
   }
@@ -58,6 +65,9 @@ module.exports = function install(args) {
         const checksums = computeChecksums(skillJson);
         manifest.set(skillJson.name, version, checksums, source);
         console.log(`\u2705 ${skillJson.name}@${version} \u2192 ${targetDir}`);
+        if (target === 'cursor') {
+          installToCursor(packageDir, skillJson, { force });
+        }
       } else {
         // --- Registry install ---
         const { name, version } = parseName(raw);
@@ -83,6 +93,9 @@ module.exports = function install(args) {
           const checksums = computeChecksums(skillJson);
           manifest.set(skillJson.name, info.version, checksums, packageName);
           console.log(`\u2705 ${skillJson.name}@${info.version} \u2192 ${targetDir}`);
+          if (target === 'cursor') {
+            installToCursor(packageDir, skillJson, { force });
+          }
         } finally {
           cleanup(packageDir);
         }
@@ -123,4 +136,43 @@ function extractSkillName(name) {
     return pkg.replace(/^skill-/, '');
   }
   return name;
+}
+
+/**
+ * Install skill entry file to .cursor/rules/ as an .mdc file.
+ * Cursor IDE reads .cursor/rules/*.mdc as project-level rules.
+ */
+function installToCursor(packageDir, skillJson, { force = false } = {}) {
+  const cursorDir = path.join(process.cwd(), '.cursor', 'rules');
+  const targetFile = path.join(cursorDir, `${skillJson.name}.mdc`);
+
+  if (fs.existsSync(targetFile) && !force) {
+    console.log(`  ⚠️  Cursor rule already exists: ${targetFile} (use --force)`);
+    return;
+  }
+
+  fs.mkdirSync(cursorDir, { recursive: true });
+
+  // Read the entry file (SKILL.md) and write as .mdc
+  const entryPath = path.join(packageDir, skillJson.entry || 'SKILL.md');
+  if (!fs.existsSync(entryPath)) {
+    console.log(`  ⚠️  Entry file not found: ${skillJson.entry || 'SKILL.md'}`);
+    return;
+  }
+
+  const content = fs.readFileSync(entryPath, 'utf8');
+  fs.writeFileSync(targetFile, content);
+  console.log(`  📎 Cursor rule → ${targetFile}`);
+}
+
+/**
+ * Extract a --key value pair from args.
+ * Returns the value and removes both --key and value from args array.
+ */
+function extractOption(args, key) {
+  const idx = args.indexOf(key);
+  if (idx === -1) return null;
+  const value = args[idx + 1];
+  args.splice(idx, 2);
+  return value;
 }

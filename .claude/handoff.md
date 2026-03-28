@@ -47,13 +47,26 @@
 - [x] SEO 키워드 보강 (README + 모든 package.json)
 - [x] `naraspace` 참조 → `castor12m` 수정
 
+## Phase 2+ 추가 완료 (2026-03-28)
+
+- [x] `skillpack version` 명령어 추가
+- [x] manifest에 source 패키지명 저장 + list에 스코프별 표시 (주황색)
+- [x] Cursor `.cursor/rules/*.mdc` 타겟 지원 (`--target cursor`)
+- [x] npm 배포: CLI 0.2.2 (init, override, version, cursor 타겟, 스코프 표시)
+
 ## 다음 단계 (Phase 3)
 
 - [ ] `skillpack search` — 레지스트리 검색
-- [ ] Cursor `.cursorrules` 타겟 지원
-- [ ] 멀티 AI 도구 설치 경로 설정
-- [ ] npm 배포: init/override 포함 CLI 0.2.0
+- [ ] 멀티 AI 도구 설치 경로 설정 (Cursor 외 추가 도구)
+- [ ] GitHub Packages 실제 배포 테스트 (`@castor12m` 스코프)
 - [ ] `skill-pack-private`에 GitHub Actions workflow 추가 (workflow 스코프 토큰 필요)
+
+## 미해결 리스크
+
+- [ ] tarball 다운로드 실패 시 에러 메시지
+- [ ] manifest.json 파일 잠금 (동시 실행 방지)
+- [ ] Node.js 18 미만 환경 에러 출력
+- [ ] `npm view` 실패 분기 처리 (패키지 미존재, 네트워크 오류)
 
 ---
 
@@ -135,7 +148,20 @@ npm run publish
 - omo, lol, ulw 3개 오케스트레이터 스킬 포함
 - GitHub Actions workflow는 토큰 스코프 문제로 별도 추가 필요
 
-### 12. npm 배포 주의사항
+### 12. Cursor 타겟 지원
+- `skillpack install review --target cursor` → Claude skills + `.cursor/rules/review.mdc`에도 설치
+- Cursor IDE는 `.cursor/rules/*.mdc` 파일을 프로젝트 레벨 규칙으로 인식
+- SKILL.md의 frontmatter + markdown 형식이 .mdc와 호환
+- `--target claude`가 기본값 (Cursor 규칙 파일은 생성하지 않음)
+- 향후 다른 AI 도구 타겟 추가 가능 (Windsurf 등)
+
+### 13. manifest source 추적
+- manifest에 `source` 필드 추가 (원본 npm 패키지명)
+- `@skillpack/*` 스코프는 public → list에서 생략
+- 그 외 스코프는 주황색으로 표시 (예: `@castor12m`, `@mycompany`)
+- 로컬 경로 설치 시에도 package.json의 name을 source로 저장
+
+### 14. npm 배포 주의사항
 - `@skillpack` scoped 패키지는 기본이 private → 배포 후 반드시 `npm access set status=public` 실행
 - 또는 publish 시 `--access public` 플래그 사용
 - npm auth token: granular access token + bypass 2FA 필요

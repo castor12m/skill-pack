@@ -19,13 +19,15 @@ Commands:
   help                                  Show this help message
 
 Options:
-  --force    Overwrite existing skill files on install/update
+  --force              Overwrite existing skill files on install/update
+  --target <target>    Install target: claude (default), cursor
 
 Examples:
   skillpack install review                Install latest version
   skillpack install review@1.0.0          Install specific version
   skillpack install sdd review debug      Install multiple skills
   skillpack install review --force        Overwrite existing files
+  skillpack install review --target cursor  Also install as Cursor rule
   skillpack list                          Show installed skills
   skillpack update                        Update all skills
   skillpack update review                 Update a specific skill
