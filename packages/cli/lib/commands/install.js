@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const manifest = require('../manifest');
-const { resolvePackageName, viewPackage, downloadAndExtract, cleanup } = require('../registry');
+const { resolvePackageName, viewPackage, downloadAndExtract, cleanup, parseGitHubUrl, downloadFromGitHub } = require('../registry');
 const { readSkillJson, installFiles, computeChecksums, ConflictError } = require('../installer');
 
 /**
@@ -30,7 +30,134 @@ function resolveLocal(raw) {
   return { packageDir: resolved, version, source };
 }
 
-module.exports = function install(args) {
+/**
+ * Parse a name[@version] string.
+ */
+function parseName(raw) {
+  if (raw.startsWith('@')) {
+    const lastAt = raw.lastIndexOf('@');
+    if (lastAt > 0) {
+      return { name: raw.slice(0, lastAt), version: raw.slice(lastAt + 1) };
+    }
+    return { name: raw, version: null };
+  }
+  const atIdx = raw.indexOf('@');
+  if (atIdx > 0) {
+    return { name: raw.slice(0, atIdx), version: raw.slice(atIdx + 1) };
+  }
+  return { name: raw, version: null };
+}
+
+/**
+ * Extract skill name from a package name.
+ * @scope/skill-xxx → xxx, review → review
+ */
+function extractSkillName(name) {
+  if (name.startsWith('@')) {
+    const parts = name.split('/');
+    const pkg = parts[parts.length - 1];
+    return pkg.replace(/^skill-/, '');
+  }
+  return name;
+}
+
+/**
+ * Install a single skill by name or local path.
+ * Returns { skillName, version } on success.
+ * Throws on failure.
+ */
+function installSingle(raw, { force = false, target = 'claude' } = {}) {
+  // GitHub install: github:owner/repo[@ref][/path]
+  const ghParsed = parseGitHubUrl(raw);
+  if (ghParsed) {
+    const packageDir = downloadFromGitHub(ghParsed);
+    try {
+      const skillJson = readSkillJson(packageDir);
+      const existing = manifest.get(skillJson.name);
+      if (existing && !force) {
+        return { skillName: skillJson.name, version: existing.version, skipped: true };
+      }
+
+      const targetDir = installFiles(packageDir, skillJson, { force });
+      const checksums = computeChecksums(skillJson);
+      const source = `github:${ghParsed.owner}/${ghParsed.repo}${ghParsed.ref !== 'HEAD' ? '@' + ghParsed.ref : ''}`;
+      // Read version from package.json if available
+      const pkgJsonPath = path.join(packageDir, 'package.json');
+      let version = '0.0.0';
+      if (fs.existsSync(pkgJsonPath)) {
+        const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
+        version = pkg.version || '0.0.0';
+      }
+      manifest.set(skillJson.name, version, checksums, source);
+
+      if (target === 'cursor') {
+        installToCursor(packageDir, skillJson, { force });
+      }
+
+      return { skillName: skillJson.name, version, skipped: false };
+    } finally {
+      // Clean up the temp directory (go up to the skillpack-gh-xxx root)
+      const tmpRoot = packageDir.split('/extracted/')[0] || path.resolve(packageDir, '..', '..');
+      fs.rmSync(tmpRoot, { recursive: true, force: true });
+    }
+  }
+
+  if (isLocalPath(raw)) {
+    const { packageDir, version, source } = resolveLocal(raw);
+    const skillJson = readSkillJson(packageDir);
+
+    const existing = manifest.get(skillJson.name);
+    if (existing && !force) {
+      return { skillName: skillJson.name, version: existing.version, skipped: true };
+    }
+
+    const targetDir = installFiles(packageDir, skillJson, { force });
+    const checksums = computeChecksums(skillJson);
+    manifest.set(skillJson.name, version, checksums, source);
+
+    if (target === 'cursor') {
+      installToCursor(packageDir, skillJson, { force });
+    }
+
+    return { skillName: skillJson.name, version, skipped: false };
+  }
+
+  // Registry install
+  const { name, version } = parseName(raw);
+  const packageName = resolvePackageName(name);
+  const skillName = extractSkillName(name);
+
+  const existing = manifest.get(skillName);
+  if (existing && !force && !version) {
+    return { skillName, version: existing.version, skipped: true };
+  }
+
+  const info = viewPackage(packageName, version);
+  if (!info) {
+    throw new Error(`Package not found: ${packageName}${version ? '@' + version : ''}`);
+  }
+
+  const packageDir = downloadAndExtract(packageName, version);
+  try {
+    const skillJson = readSkillJson(packageDir);
+    const targetDir = installFiles(packageDir, skillJson, { force });
+    const checksums = computeChecksums(skillJson);
+    manifest.set(skillJson.name, info.version, checksums, packageName);
+
+    if (target === 'cursor') {
+      installToCursor(packageDir, skillJson, { force });
+    }
+
+    return { skillName: skillJson.name, version: info.version, skipped: false };
+  } finally {
+    cleanup(packageDir);
+  }
+}
+
+/**
+ * CLI entry point: skillpack install <name[@version]> [...]
+ */
+function install(args) {
   const force = args.includes('--force');
   const target = extractOption(args, '--target') || 'claude';
   const names = args.filter(a => !a.startsWith('--'));
@@ -50,55 +177,11 @@ module.exports = function install(args) {
 
   for (const raw of names) {
     try {
-      if (isLocalPath(raw)) {
-        // --- Local path install ---
-        const { packageDir, version, source } = resolveLocal(raw);
-        const skillJson = readSkillJson(packageDir);
-
-        const existing = manifest.get(skillJson.name);
-        if (existing && !force) {
-          console.log(`${skillJson.name}@${existing.version} is already installed. Use --force to reinstall.`);
-          continue;
-        }
-
-        const targetDir = installFiles(packageDir, skillJson, { force });
-        const checksums = computeChecksums(skillJson);
-        manifest.set(skillJson.name, version, checksums, source);
-        console.log(`\u2705 ${skillJson.name}@${version} \u2192 ${targetDir}`);
-        if (target === 'cursor') {
-          installToCursor(packageDir, skillJson, { force });
-        }
+      const result = installSingle(raw, { force, target });
+      if (result.skipped) {
+        console.log(`${result.skillName}@${result.version} is already installed. Use --force to reinstall.`);
       } else {
-        // --- Registry install ---
-        const { name, version } = parseName(raw);
-        const packageName = resolvePackageName(name);
-
-        const existing = manifest.get(extractSkillName(name));
-        if (existing && !force && !version) {
-          console.log(`${extractSkillName(name)}@${existing.version} is already installed. Use --force to reinstall.`);
-          continue;
-        }
-
-        const info = viewPackage(packageName, version);
-        if (!info) {
-          console.error(`Package not found: ${packageName}${version ? '@' + version : ''}`);
-          process.exitCode = 1;
-          continue;
-        }
-
-        const packageDir = downloadAndExtract(packageName, version);
-        try {
-          const skillJson = readSkillJson(packageDir);
-          const targetDir = installFiles(packageDir, skillJson, { force });
-          const checksums = computeChecksums(skillJson);
-          manifest.set(skillJson.name, info.version, checksums, packageName);
-          console.log(`\u2705 ${skillJson.name}@${info.version} \u2192 ${targetDir}`);
-          if (target === 'cursor') {
-            installToCursor(packageDir, skillJson, { force });
-          }
-        } finally {
-          cleanup(packageDir);
-        }
+        console.log(`\u2705 ${result.skillName}@${result.version}`);
       }
     } catch (err) {
       if (err instanceof ConflictError) {
@@ -109,65 +192,35 @@ module.exports = function install(args) {
       process.exitCode = 1;
     }
   }
-};
-
-function parseName(raw) {
-  // Handle scoped packages: @scope/name@version
-  if (raw.startsWith('@')) {
-    const lastAt = raw.lastIndexOf('@');
-    if (lastAt > 0) {
-      return { name: raw.slice(0, lastAt), version: raw.slice(lastAt + 1) };
-    }
-    return { name: raw, version: null };
-  }
-  // Simple name: name@version
-  const atIdx = raw.indexOf('@');
-  if (atIdx > 0) {
-    return { name: raw.slice(0, atIdx), version: raw.slice(atIdx + 1) };
-  }
-  return { name: raw, version: null };
-}
-
-function extractSkillName(name) {
-  // @scope/skill-xxx → xxx, review → review
-  if (name.startsWith('@')) {
-    const parts = name.split('/');
-    const pkg = parts[parts.length - 1];
-    return pkg.replace(/^skill-/, '');
-  }
-  return name;
 }
 
 /**
  * Install skill entry file to .cursor/rules/ as an .mdc file.
- * Cursor IDE reads .cursor/rules/*.mdc as project-level rules.
  */
 function installToCursor(packageDir, skillJson, { force = false } = {}) {
   const cursorDir = path.join(process.cwd(), '.cursor', 'rules');
   const targetFile = path.join(cursorDir, `${skillJson.name}.mdc`);
 
   if (fs.existsSync(targetFile) && !force) {
-    console.log(`  ⚠️  Cursor rule already exists: ${targetFile} (use --force)`);
+    console.log(`  \u26a0\ufe0f  Cursor rule already exists: ${targetFile} (use --force)`);
     return;
   }
 
   fs.mkdirSync(cursorDir, { recursive: true });
 
-  // Read the entry file (SKILL.md) and write as .mdc
   const entryPath = path.join(packageDir, skillJson.entry || 'SKILL.md');
   if (!fs.existsSync(entryPath)) {
-    console.log(`  ⚠️  Entry file not found: ${skillJson.entry || 'SKILL.md'}`);
+    console.log(`  \u26a0\ufe0f  Entry file not found: ${skillJson.entry || 'SKILL.md'}`);
     return;
   }
 
   const content = fs.readFileSync(entryPath, 'utf8');
   fs.writeFileSync(targetFile, content);
-  console.log(`  📎 Cursor rule → ${targetFile}`);
+  console.log(`  \ud83d\udcce Cursor rule \u2192 ${targetFile}`);
 }
 
 /**
  * Extract a --key value pair from args.
- * Returns the value and removes both --key and value from args array.
  */
 function extractOption(args, key) {
   const idx = args.indexOf(key);
@@ -176,3 +229,8 @@ function extractOption(args, key) {
   args.splice(idx, 2);
   return value;
 }
+
+module.exports = install;
+module.exports.installSingle = installSingle;
+module.exports.parseName = parseName;
+module.exports.extractSkillName = extractSkillName;

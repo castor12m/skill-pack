@@ -1,22 +1,23 @@
 # SkillPack
 
-> A package manager for AI coding assistant skills — install, manage, and publish like npm
+> Team-first AI skill management — standardize, version, audit, and benchmark your team's AI coding skills
 
-**SkillPack** is a CLI tool that brings npm-style package management to [Claude Code](https://docs.anthropic.com/en/docs/claude-code) custom skills. Install community-built skills, share your own, and keep everything versioned and in sync across machines and teams.
+**SkillPack** is a CLI tool for managing [Agent Skills](https://agentskills.io) across teams and organizations. Built on npm infrastructure, it provides version pinning, team synchronization, integrity auditing, and skill benchmarking — with zero additional infrastructure.
 
-Keywords: Claude Code skills, AI coding assistant, prompt management, slash commands, AI developer tools, Claude Code extensions, AI workflow automation
+Keywords: Claude Code skills, Agent Skills, AI coding assistant, team skill management, skill audit, skill benchmark, prompt management, slash commands, AI developer tools, Codex skills, skill governance
 
 ---
 
 ## Why SkillPack?
 
-[Claude Code](https://docs.anthropic.com/en/docs/claude-code) lets you define custom skills (slash commands) in `~/.claude/skills/`. But:
+AI coding agents (Claude Code, Codex, Cursor, etc.) support custom skills via the [Agent Skills](https://agentskills.io) open standard. But teams face real problems:
 
-- There's no official way to keep skills in sync across multiple machines
-- No version tracking — you can't tell which version of a skill you're running
-- No system for standardizing skills across a team or onboarding new members
+- **No team standardization** — each developer has different skills at different versions
+- **No governance** — no way to audit what skills are installed or detect unauthorized modifications
+- **No quality measurement** — no way to prove a skill actually improves code quality
+- **No onboarding** — new team members manually copy skills from colleagues
 
-**SkillPack leverages npm infrastructure** to provide versioning, a registry, and team access control — with zero additional infrastructure.
+**SkillPack solves these with npm infrastructure** — versioning, private registries, team sync, integrity auditing, and skill benchmarking.
 
 ---
 
@@ -193,23 +194,26 @@ Or publish independently to npm under your own scope (`@yourname/skill-xxx`) to 
 
 ## Roadmap
 
-### Phase 1 — MVP
-- [x] CLI (install, list, update, uninstall)
+### Phase 1 — MVP (complete)
+- [x] CLI (install, list, update, uninstall, search, init, override)
 - [x] 5 core skills packaged (review, sdd, debug, handoff, refactor)
 - [x] Local path install support
 - [x] Checksum-based local modification detection
 - [x] npmjs.com deployment
 
-### Phase 2 — Team Operations
-- [ ] Private skills via GitHub Packages
-- [ ] `skillpack override` — project-local overrides
-- [ ] `skillpack init` — new skill scaffolding
-- [ ] CONTRIBUTING.md
+### Phase 2 — Team Operations (complete)
+- [x] Private skills via GitHub Packages
+- [x] `skillpack override` — project-local overrides
+- [x] `skillpack init` — new skill scaffolding
+- [x] Cursor `.cursor/rules/*.mdc` target support
+- [x] CONTRIBUTING.md
 
-### Phase 3 — Expansion
-- [ ] `skillpack search` — registry search
-- [ ] Cursor `.cursorrules` target support
-- [ ] Multi-AI tool install path configuration
+### Phase 3 — Enterprise & Quality
+- [x] Agent Skills open standard compatibility
+- [ ] `skillpack team init/sync` — team skill standardization
+- [ ] `skillpack audit` — integrity audit with JSON output
+- [ ] `skillpack bench` — skill quality benchmarking (A/B + LLM-as-a-Judge)
+- [ ] GitHub URL install (`github:owner/repo`)
 
 ---
 

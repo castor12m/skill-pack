@@ -23,6 +23,9 @@ Commands:
   search [query]                        Search for skills on npm
   init <name> [--scope <scope>]         Scaffold a new skill package
   override <name>                       Copy skill to project for local editing
+  team init [--force]                   Generate team config from installed skills
+  team sync [--force] [--dry-run]       Sync skills to match team config
+  audit [--json] [--offline]            Audit installed skills for integrity
   help                                  Show this help message
 
 Options:
@@ -75,6 +78,10 @@ function run() {
       return require('../lib/commands/init')(args.slice(1));
     case 'override':
       return require('../lib/commands/override')(args.slice(1));
+    case 'team':
+      return require('../lib/commands/team')(args.slice(1));
+    case 'audit':
+      return require('../lib/commands/audit')(args.slice(1));
     case 'version':
     case '--version':
     case '-v':

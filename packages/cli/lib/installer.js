@@ -4,14 +4,55 @@ const path = require('path');
 const { skillsDir } = require('./paths');
 
 /**
+ * Parse YAML frontmatter from a SKILL.md file.
+ * Returns { name, description } or null if no valid frontmatter.
+ */
+function parseSkillFrontmatter(filePath) {
+  if (!fs.existsSync(filePath)) return null;
+  const content = fs.readFileSync(filePath, 'utf8');
+  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!match) return null;
+  const frontmatter = {};
+  for (const line of match[1].split('\n')) {
+    const colonIdx = line.indexOf(':');
+    if (colonIdx === -1) continue;
+    const key = line.slice(0, colonIdx).trim();
+    const value = line.slice(colonIdx + 1).trim().replace(/^["']|["']$/g, '');
+    if (key && value) frontmatter[key] = value;
+  }
+  return frontmatter.name ? frontmatter : null;
+}
+
+/**
  * Read skill.json from an extracted package directory.
+ * Falls back to SKILL.md frontmatter (Agent Skills open standard) if skill.json is absent.
  */
 function readSkillJson(packageDir) {
   const skillJsonPath = path.join(packageDir, 'skill.json');
-  if (!fs.existsSync(skillJsonPath)) {
-    throw new Error(`skill.json not found in package. Is this a valid SkillPack skill?`);
+  if (fs.existsSync(skillJsonPath)) {
+    return JSON.parse(fs.readFileSync(skillJsonPath, 'utf8'));
   }
-  return JSON.parse(fs.readFileSync(skillJsonPath, 'utf8'));
+
+  // Fallback: read from SKILL.md frontmatter (Agent Skills open standard)
+  const skillMdPath = path.join(packageDir, 'SKILL.md');
+  const frontmatter = parseSkillFrontmatter(skillMdPath);
+  if (frontmatter) {
+    // Collect all non-metadata files for installation
+    const allFiles = fs.readdirSync(packageDir).filter(f =>
+      !['package.json', 'node_modules', '.git', '.gitignore'].includes(f)
+    );
+    return {
+      name: frontmatter.name,
+      command: frontmatter.command || `/${frontmatter.name}`,
+      entry: 'SKILL.md',
+      files: allFiles,
+    };
+  }
+
+  throw new Error(
+    `No skill.json or SKILL.md with frontmatter found in package.\n` +
+    `Expected either skill.json or a SKILL.md with Agent Skills frontmatter (name, description).`
+  );
 }
 
 /**
@@ -149,5 +190,5 @@ function getModifiedFiles(skillName, savedChecksums) {
 }
 
 module.exports = {
-  readSkillJson, installFiles, uninstallFiles, computeChecksums, getModifiedFiles, ConflictError,
+  readSkillJson, parseSkillFrontmatter, installFiles, uninstallFiles, computeChecksums, getModifiedFiles, ConflictError,
 };
