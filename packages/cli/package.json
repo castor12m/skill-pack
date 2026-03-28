@@ -1,6 +1,6 @@
 {
   "name": "@skillpack/cli",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "SkillPack CLI — AI coding tool skill package manager",
   "bin": {
     "skillpack": "bin/skillpack.js"

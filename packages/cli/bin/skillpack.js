@@ -1,5 +1,11 @@
 #!/usr/bin/env node
 
+const [major] = process.versions.node.split('.').map(Number);
+if (major < 18) {
+  console.error(`SkillPack requires Node.js 18 or later. Current: ${process.version}`);
+  process.exit(1);
+}
+
 const args = process.argv.slice(2);
 const command = args[0];
 
@@ -14,6 +20,7 @@ Commands:
   list [--all]                          List installed skills (--all: include local)
   update [name]                         Update all or a specific skill
   uninstall <name>                      Remove an installed skill
+  search [query]                        Search for skills on npm
   init <name> [--scope <scope>]         Scaffold a new skill package
   override <name>                       Copy skill to project for local editing
   help                                  Show this help message
@@ -32,6 +39,8 @@ Examples:
   skillpack update                        Update all skills
   skillpack update review                 Update a specific skill
   skillpack uninstall review              Remove a skill
+  skillpack search                        List all available skills
+  skillpack search debug                  Search for debug-related skills
   skillpack init myskill                  Create new skill package
   skillpack init myskill --scope @myco    Create with custom scope
   skillpack override review               Override review skill locally
@@ -59,6 +68,9 @@ function run() {
     case 'rm':
     case 'remove':
       return require('../lib/commands/uninstall')(args.slice(1));
+    case 'search':
+    case 's':
+      return require('../lib/commands/search')(args.slice(1));
     case 'init':
       return require('../lib/commands/init')(args.slice(1));
     case 'override':

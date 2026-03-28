@@ -29,7 +29,13 @@ function viewPackage(packageName, version) {
       version: info.version,
       tarball: info.dist && info.dist.tarball,
     };
-  } catch {
+  } catch (err) {
+    const stderr = err.stderr ? err.stderr.toString() : '';
+    const is404 = stderr.includes('E404') || stderr.includes('Not found') || (err.stdout && err.stdout.includes('"error"'));
+    if (is404) {
+      return null;
+    }
+    console.error(`Network error looking up ${spec}. Check your internet connection and npm registry access.`);
     return null;
   }
 }
@@ -41,6 +47,7 @@ function viewPackage(packageName, version) {
 function downloadAndExtract(packageName, version) {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'skillpack-'));
   const spec = version ? `${packageName}@${version}` : packageName;
+  let tgzPath;
   try {
     execSync(`npm pack ${spec} --pack-destination ${tmpDir}`, {
       encoding: 'utf8',
@@ -50,15 +57,21 @@ function downloadAndExtract(packageName, version) {
     if (tgzFiles.length === 0) {
       throw new Error(`Failed to download ${spec}`);
     }
-    const tgzPath = path.join(tmpDir, tgzFiles[0]);
+    tgzPath = path.join(tmpDir, tgzFiles[0]);
+  } catch (err) {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+    console.error(`Failed to download ${spec}. Check your network connection and npm registry access.`);
+    throw err;
+  }
+  try {
     const extractDir = path.join(tmpDir, 'extracted');
     fs.mkdirSync(extractDir);
     execSync(`tar -xzf ${tgzPath} -C ${extractDir}`, { stdio: 'pipe' });
     // npm pack extracts to a 'package/' subdirectory
     return path.join(extractDir, 'package');
   } catch (err) {
-    // Clean up on failure
     fs.rmSync(tmpDir, { recursive: true, force: true });
+    console.error(`Failed to extract ${spec}. The package may be corrupted. Try reinstalling.`);
     throw err;
   }
 }

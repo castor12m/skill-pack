@@ -3,7 +3,14 @@ const { manifestDir, manifestFile } = require('./paths');
 
 function read() {
   if (!fs.existsSync(manifestFile)) return {};
-  return JSON.parse(fs.readFileSync(manifestFile, 'utf8'));
+  const raw = fs.readFileSync(manifestFile, 'utf8');
+  try {
+    return JSON.parse(raw);
+  } catch {
+    console.error(`Warning: manifest.json is corrupted and could not be parsed. Returning empty state.`);
+    console.error(`Run \`skillpack list\` to verify your installed skills.`);
+    return {};
+  }
 }
 
 function write(data) {
