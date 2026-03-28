@@ -26,6 +26,8 @@ Commands:
   team init [--force]                   Generate team config from installed skills
   team sync [--force] [--dry-run]       Sync skills to match team config
   audit [--json] [--offline]            Audit installed skills for integrity
+  bench init [--force]                  Scaffold bench.yaml for skill benchmarking
+  bench run [--json] [--yes] [--runs N] Run A/B benchmark (requires @skillpack/bench)
   help                                  Show this help message
 
 Options:
@@ -82,6 +84,23 @@ function run() {
       return require('../lib/commands/team')(args.slice(1));
     case 'audit':
       return require('../lib/commands/audit')(args.slice(1));
+    case 'bench': {
+      const sub = args[1];
+      if (!sub || sub === 'help' || sub === '--help') {
+        console.log('Usage: skillpack bench <init|run> [options]\n  init [--force]                  Scaffold bench.yaml\n  run [--json] [--yes] [--runs N] Run A/B benchmark');
+        return;
+      }
+      try {
+        const handler = require(`@skillpack/bench/lib/commands/${sub}`);
+        return handler(args.slice(2));
+      } catch (e) {
+        if (e.code === 'MODULE_NOT_FOUND') {
+          console.error('bench requires @skillpack/bench. Install:\n  npm i -g @skillpack/bench');
+          process.exitCode = 1;
+        } else throw e;
+      }
+      return;
+    }
     case 'version':
     case '--version':
     case '-v':

@@ -1,0 +1,43 @@
+{
+  "name": "@skillpack/bench",
+  "version": "0.1.0",
+  "description": "Skill quality benchmarking — A/B comparison with LLM-as-a-Judge",
+  "keywords": [
+    "claude-code",
+    "claude-code-skills",
+    "skill",
+    "skillpack",
+    "benchmark",
+    "llm-judge",
+    "ai-coding-assistant",
+    "ai-developer-tools"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/castor12m/skill-pack.git",
+    "directory": "packages/bench"
+  },
+  "scripts": {
+    "test": "node --test test/**/*.test.js"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.52.0",
+    "js-yaml": "^4.1.0"
+  },
+  "peerDependencies": {
+    "@skillpack/cli": ">=0.4.0"
+  },
+  "peerDependenciesMeta": {
+    "@skillpack/cli": {
+      "optional": true
+    }
+  },
+  "files": [
+    "lib/",
+    "templates/"
+  ]
+}
